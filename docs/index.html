@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Programming Fonts Installer - Browse &amp; Install Programming Fonts</title>
+    <meta name="description" content="A terminal UI application for browsing and installing programming fonts. Built with Python and Textual.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #0d1117;
+            --bg-secondary: #161b22;
+            --border: #30363d;
+            --text: #c9d1d9;
+            --text-muted: #8b949e;
+            --green: #3fb950;
+            --cyan: #58a6ff;
+            --yellow: #d29922;
+            --purple: #bc8cff;
+            --red: #f85149;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        a {
+            color: var(--cyan);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        a:hover {
+            color: var(--green);
+        }
+
+        /* Terminal window component */
+        .terminal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .terminal-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: #1c2129;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .terminal-dot.red { background: var(--red); }
+        .terminal-dot.yellow { background: var(--yellow); }
+        .terminal-dot.green { background: var(--green); }
+
+        .terminal-title {
+            flex: 1;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .terminal-body {
+            padding: 20px;
+            font-size: 0.9rem;
+            line-height: 1.8;
+        }
+
+        /* Blinking cursor */
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 1.1em;
+            background: var(--green);
+            vertical-align: text-bottom;
+            animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        /* Layout */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        section {
+            padding: 60px 0;
+        }
+
+        /* Hero */
+        .hero {
+            padding: 80px 0 60px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 2.4rem;
+            color: var(--green);
+            margin-bottom: 8px;
+        }
+
+        .hero .tagline {
+            font-size: 1rem;
+            color: var(--text-muted);
+            margin-bottom: 40px;
+        }
+
+        .hero .prompt {
+            color: var(--green);
+        }
+
+        .hero .command {
+            color: var(--cyan);
+        }
+
+        .hero .flag {
+            color: var(--yellow);
+        }
+
+        .hero .terminal-body {
+            text-align: left;
+        }
+
+        .badge-row {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 24px;
+        }
+
+        .badge {
+            display: inline-block;
+            font-size: 0.75rem;
+            padding: 4px 12px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            color: var(--text-muted);
+        }
+
+        .badge.green { border-color: var(--green); color: var(--green); }
+        .badge.cyan { border-color: var(--cyan); color: var(--cyan); }
+        .badge.purple { border-color: var(--purple); color: var(--purple); }
+
+        /* Features */
+        .features-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .feature-card {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            background: var(--bg-secondary);
+            transition: border-color 0.2s;
+        }
+
+        .feature-card:hover {
+            border-color: var(--green);
+        }
+
+        .feature-card .icon {
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .feature-card h3 {
+            font-size: 0.95rem;
+            color: var(--green);
+            margin-bottom: 6px;
+        }
+
+        .feature-card p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* Section headers */
+        .section-title {
+            font-size: 1.4rem;
+            color: var(--cyan);
+            margin-bottom: 8px;
+        }
+
+        .section-subtitle {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 24px;
+        }
+
+        /* Installation */
+        .install-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .step {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .step-num {
+            flex-shrink: 0;
+            width: 32px;
+            height: 32px;
+            border: 1px solid var(--green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            color: var(--green);
+        }
+
+        .step-content h4 {
+            font-size: 0.9rem;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .step-content p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        code {
+            background: var(--bg);
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            font-size: 0.85em;
+            color: var(--cyan);
+        }
+
+        .code-block {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 16px;
+            margin-top: 12px;
+            overflow-x: auto;
+        }
+
+        .code-block .line {
+            display: block;
+        }
+
+        .code-block .comment {
+            color: var(--text-muted);
+        }
+
+        .code-block .prompt {
+            color: var(--green);
+        }
+
+        .code-block .cmd {
+            color: var(--text);
+        }
+
+        /* Keyboard shortcuts */
+        .shortcuts-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 24px;
+        }
+
+        .shortcuts-table th,
+        .shortcuts-table td {
+            text-align: left;
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.85rem;
+        }
+
+        .shortcuts-table th {
+            color: var(--text-muted);
+            font-weight: 400;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        kbd {
+            display: inline-block;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85em;
+            color: var(--yellow);
+            min-width: 28px;
+            text-align: center;
+        }
+
+        .shortcuts-table td:last-child {
+            color: var(--text-muted);
+        }
+
+        /* Footer */
+        .footer {
+            border-top: 1px solid var(--border);
+            padding: 32px 0;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 16px;
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .hero h1 {
+                font-size: 1.6rem;
+            }
+
+            .hero .tagline {
+                font-size: 0.85rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            section {
+                padding: 40px 0;
+            }
+
+            .step {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .terminal-body {
+                font-size: 0.8rem;
+                padding: 14px;
+            }
+
+            .shortcuts-table th,
+            .shortcuts-table td {
+                padding: 8px 10px;
+                font-size: 0.78rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="container">
+            <h1>&gt; programming-font-installer</h1>
+            <p class="tagline">Browse and install 100+ programming fonts from your terminal.</p>
+
+            <div class="terminal">
+                <div class="terminal-bar">
+                    <span class="terminal-dot red"></span>
+                    <span class="terminal-dot yellow"></span>
+                    <span class="terminal-dot green"></span>
+                    <span class="terminal-title">font_installer.py</span>
+                </div>
+                <div class="terminal-body">
+                    <span class="prompt">$</span> <span class="command">pip install</span> <span class="flag">-r requirements.txt</span><br>
+                    <span class="prompt">$</span> <span class="command">python</span> font_installer.py<br>
+                    <br>
+                    <span style="color: var(--green);">&#9632; Programming Fonts Installer</span><br>
+                    <span style="color: var(--text-muted);">  Loading 100+ fonts...</span> <span style="color: var(--green);">done</span><br>
+                    <span style="color: var(--text-muted);">  Ready. Select a font to view details.</span><span class="cursor"></span>
+                </div>
+            </div>
+
+            <div class="badge-row">
+                <span class="badge green">Python 3</span>
+                <span class="badge cyan">Textual TUI</span>
+                <span class="badge purple">Cross-platform</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features">
+        <div class="container">
+            <h2 class="section-title"># Features</h2>
+            <p class="section-subtitle">Everything you need to find and install the right programming font.</p>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <span class="icon" style="color: var(--cyan);">&#9776;</span>
+                    <h3>Browse 100+ Fonts</h3>
+                    <p>Curated collection from the ProgrammingFonts repository, including Fira Code, JetBrains Mono, Hack, and many more.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="icon" style="color: var(--green);">&#9660;</span>
+                    <h3>One-Key Install</h3>
+                    <p>Select a font and press <kbd>i</kbd> to install. Downloads directly from GitHub and places files in the correct OS directory.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="icon" style="color: var(--yellow);">&#9208;</span>
+                    <h3>Real-Time Search</h3>
+                    <p>Press <kbd>/</kbd> and start typing to instantly filter the font list. Find exactly what you need in seconds.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="icon" style="color: var(--purple);">&#9881;</span>
+                    <h3>Cross-Platform</h3>
+                    <p>Works on Linux, macOS, and Windows. Automatically detects your OS and installs to the correct font directory.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Installation -->
+    <section id="installation">
+        <div class="container">
+            <h2 class="section-title"># Installation</h2>
+            <p class="section-subtitle">Get up and running in three steps.</p>
+
+            <div class="install-steps">
+                <div class="step">
+                    <span class="step-num">1</span>
+                    <div class="step-content">
+                        <h4>Clone the repository</h4>
+                        <div class="code-block">
+                            <span class="line"><span class="prompt">$</span> <span class="cmd">git clone https://github.com/anam-hussain/font-installer.git</span></span>
+                            <span class="line"><span class="prompt">$</span> <span class="cmd">cd font-installer</span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="step">
+                    <span class="step-num">2</span>
+                    <div class="step-content">
+                        <h4>Install dependencies</h4>
+                        <p>Requires Python 3 and pip.</p>
+                        <div class="code-block">
+                            <span class="line"><span class="prompt">$</span> <span class="cmd">pip install -r requirements.txt</span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="step">
+                    <span class="step-num">3</span>
+                    <div class="step-content">
+                        <h4>Run the application</h4>
+                        <div class="code-block">
+                            <span class="line"><span class="prompt">$</span> <span class="cmd">python font_installer.py</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Keyboard Shortcuts -->
+    <section id="shortcuts">
+        <div class="container">
+            <h2 class="section-title"># Keyboard Shortcuts</h2>
+            <p class="section-subtitle">Navigate the TUI without leaving the keyboard.</p>
+
+            <div class="terminal">
+                <div class="terminal-bar">
+                    <span class="terminal-dot red"></span>
+                    <span class="terminal-dot yellow"></span>
+                    <span class="terminal-dot green"></span>
+                    <span class="terminal-title">keybindings</span>
+                </div>
+                <div class="terminal-body" style="padding: 0;">
+                    <table class="shortcuts-table">
+                        <thead>
+                            <tr>
+                                <th>Key</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><kbd>/</kbd></td>
+                                <td>Focus the search box to filter fonts</td>
+                            </tr>
+                            <tr>
+                                <td><kbd>j</kbd> / <kbd>k</kbd></td>
+                                <td>Move down / up in the font list</td>
+                            </tr>
+                            <tr>
+                                <td><kbd>i</kbd></td>
+                                <td>Install the selected font</td>
+                            </tr>
+                            <tr>
+                                <td><kbd>r</kbd></td>
+                                <td>Refresh the font list</td>
+                            </tr>
+                            <tr>
+                                <td><kbd>Esc</kbd></td>
+                                <td>Quit the application</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-links">
+                <a href="https://github.com/anam-hussain/font-installer">GitHub Repository</a>
+                <a href="https://github.com/ProgrammingFonts/ProgrammingFonts">ProgrammingFonts</a>
+                <a href="https://textual.textualize.io/">Textual</a>
+            </div>
+            <p>Built with Python &amp; Textual. Font data from ProgrammingFonts.</p>
+        </div>
+    </footer>
+
+</body>
+</html>
