@@ -178,33 +178,38 @@ class FontBrowser(App):
         border: solid $accent;
         padding: 1;
     }
-    
+
     #search-box {
         margin-bottom: 1;
     }
-    
+
     #font-list {
         height: 1fr;
         border: solid $secondary;
     }
-    
-    #info-panel {
-        height: 100%;
+
+    #info-scroll {
+        height: 1fr;
     }
-    
+
+    #info-panel {
+        height: auto;
+    }
+
     .info-title {
         text-style: bold;
         color: $accent;
         margin-bottom: 1;
     }
-    
+
     .info-text {
         margin-bottom: 1;
     }
-    
+
     #button-container {
+        dock: bottom;
         height: auto;
-        margin-top: 1;
+        padding-top: 1;
     }
     
     Button {
@@ -265,10 +270,11 @@ class FontBrowser(App):
                         id="font-list"
                     )
                 
-                with VerticalScroll(id="right-panel"):
+                with Vertical(id="right-panel"):
                     yield Label("Font Information", classes="info-title")
-                    yield Static(id="info-panel", markup=True)
-                    
+                    with VerticalScroll(id="info-scroll"):
+                        yield Static(id="info-panel", markup=True)
+
                     with Horizontal(id="button-container"):
                         yield Button("Install Font", id="install-btn", variant="success")
                         yield Button("Refresh List", id="refresh-btn", variant="primary")
